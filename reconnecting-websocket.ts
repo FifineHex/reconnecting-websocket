@@ -25,6 +25,7 @@ export type CloseEvent = Events.CloseEvent;
 
 export type Options = {
     WebSocket?: any;
+    WebSocketOptions?: any | {};
     maxReconnectionDelay?: number;
     minReconnectionDelay?: number;
     reconnectionDelayGrowFactor?: number;
@@ -75,10 +76,10 @@ export default class ReconnectingWebSocket {
     private _binaryType: BinaryType = 'blob';
     private _closeCalled = false;
     private _messageQueue: Message[] = [];
+    private _options: Options;
 
     private readonly _url: UrlProvider;
     private readonly _protocols?: string | string[];
-    private readonly _options: Options;
 
     constructor(url: UrlProvider, protocols?: string | string[], options: Options = {}) {
         this._url = url;
@@ -234,10 +235,11 @@ export default class ReconnectingWebSocket {
      * Closes the WebSocket connection or connection attempt and connects again.
      * Resets retry counter;
      */
-    public reconnect(code?: number, reason?: string) {
+    public reconnect(code?: number, reason?: string, options?: Options) {
         this._shouldReconnect = true;
         this._closeCalled = false;
         this._retryCount = -1;
+        if (options) this._options = options;
         if (!this._ws || this._ws.readyState === this.CLOSED) {
             this._connect();
         } else {
@@ -376,18 +378,23 @@ export default class ReconnectingWebSocket {
             .then(url => {
                 // close could be called before creating the ws
                 if (this._closeCalled) {
+                    this._connectLock = false;
                     return;
                 }
-                this._debug('connect', {url, protocols: this._protocols});
+                this._debug('connect', {url, protocols: this._protocols, options: this._options});
                 this._ws = this._protocols
-                    ? new WebSocket(url, this._protocols)
-                    : new WebSocket(url);
+                    ? new WebSocket(url, this._protocols, this._options.WebSocketOptions)
+                    : new WebSocket(url, this._options.WebSocketOptions);
                 this._ws!.binaryType = this._binaryType;
                 this._connectLock = false;
                 this._addListeners();
 
                 this._connectTimeout = setTimeout(() => this._handleTimeout(), connectionTimeout);
-            });
+            })
+            .catch(err => {
+                this._connectLock = false;
+                this._handleError(new Events.ErrorEvent(Error(err.message), this))
+            })
     }
 
     private _handleTimeout() {

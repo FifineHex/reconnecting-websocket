@@ -1,8 +1,5 @@
 # Reconnecting WebSocket
 
-[![Build Status](https://travis-ci.org/pladaria/reconnecting-websocket.svg?branch=master&v=1)](https://travis-ci.org/pladaria/reconnecting-websocket)
-[![Coverage Status](https://coveralls.io/repos/github/pladaria/reconnecting-websocket/badge.svg?branch=master&v=3)](https://coveralls.io/github/pladaria/reconnecting-websocket?branch=master)
-
 WebSocket that will automatically reconnect if the connection is closed.
 
 ## Features
@@ -20,7 +17,7 @@ WebSocket that will automatically reconnect if the connection is closed.
 ## Install
 
 ```bash
-npm install --save reconnecting-websocket
+yarn add reconnecting-websocket
 ```
 
 ## Usage
@@ -167,10 +164,6 @@ OPEN       1 The connection is open and ready to communicate.
 CLOSING    2 The connection is in the process of closing.
 CLOSED     3 The connection is closed or couldn't be opened.
 ```
-
-## Contributing
-
-[Read here](./CONTRIBUTING.md)
 
 ## License
 
